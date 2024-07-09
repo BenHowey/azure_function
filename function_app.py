@@ -125,9 +125,10 @@ def postFunc(req: func.HttpRequest) -> func.HttpResponse:
         logging.info('Cleaning data')
         data = clean_data(data)
         logging.info('Nesting data')
-        nested_json = data.apply(nest_data, axis=1).to_json()
+        # nested_json = data.apply(nest_data, axis=1).to_json()
+        nested_json = data.apply(nest_data, axis=1).to_list()
         logging.info(f'Converting to json {type(nested_json)}')
-        summary = nested_json
+        summary = {"expensesBenefits": nested_json}
         # logging.info('Returning the response')
     return func.HttpResponse(
         summary,
