@@ -1,7 +1,11 @@
-import azure.functions as func
+import datetime
+import json
 import logging
-import pandas as pd
+import random
 from io import BytesIO
+
+import azure.functions as func
+import pandas as pd
 from requests_toolbelt.multipart import decoder
 
 app = func.FunctionApp()
@@ -103,6 +107,8 @@ def test_function(req: func.HttpRequest) -> func.HttpResponse:
 @app.route(route="hello2", auth_level=func.AuthLevel.ANONYMOUS)
 def test_function2(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
+    print('This is a print statement')
+    print(req.get_body())
     return func.HttpResponse(
         "This HTTP triggered function executed successfully 22222.",
         status_code=200
@@ -125,10 +131,29 @@ def postFunc(req: func.HttpRequest) -> func.HttpResponse:
         logging.info('Cleaning data')
         data = clean_data(data)
         logging.info('Nesting data')
-        nested_json = data.apply(nest_data, axis=1).to_json()
+        nested_json = data.apply(nest_data, axis=1).to_list()
+
+        rand_submission_id = random.randint(0, 1000000)
+
+        # add this to the root template
+        output_json_data = {
+            "requestType": "EnhancedReportingSubmission",
+            "employerRegistrationNumber": "0071860E",
+            "taxYear": datetime.datetime.now().year,
+            "softwareUsed": "RNLI_csv2json",
+            "softwareVersion": "1.0",
+            "enhancedReportingRunReference": f"RNLI_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            "submissionID": f"Sub_{rand_submission_id}",
+            "requestBody": {
+                "expensesBenefits": nested_json,
+                "lineItemIDsToDelete": []
+            }
+        }
+
         # nested_json = data.apply(nest_data, axis=1).to_list()
         logging.info(f'Converting to json {type(nested_json)}')
-        summary = {"expensesBenefits": nested_json}
+        # summary = {"expensesBenefits": nested_json}
+        summary = json.dumps(output_json_data, indent=4)
         # logging.info('Returning the response')
     return func.HttpResponse(
         summary,
