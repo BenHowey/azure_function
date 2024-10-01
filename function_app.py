@@ -104,7 +104,7 @@ def test_function(req: func.HttpRequest) -> func.HttpResponse:
 
 
 @app.function_name(name="HttpTrigger2")
-@app.route(route="hello2", auth_level=func.AuthLevel.ANONYMOUS)
+@app.route(route="hello2", auth_level=func.AuthLevel.FUNCTION)
 def test_function2(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
     print('This is a print statement')
